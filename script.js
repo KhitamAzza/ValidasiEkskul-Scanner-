@@ -113,11 +113,11 @@ function onScanSuccess(decodedText) {
   const student = findStudent(studentId);
   if (student) {
     showStampAnimation(student, () => {
-  showDetailModal(student.idSiswa);
-  setTimeout(() => {
-    closeAllModals();
-  }, 8000);
-});
+      showDetailModal(student.idSiswa);
+      setTimeout(() => {
+        closeAllModals();
+      }, 8000);
+    });
     toast('Siswa ditemukan: ' + student.nama);
   } else {
     toast('Siswa tidak ditemukan: ' + studentId);
@@ -619,7 +619,10 @@ function handleBarcodeScan(barcode) {
   const student = findStudent(barcode);
   if (student) {
     showStampAnimation(student, () => {
-      showStudentModal(student);
+      showDetailModal(student.idSiswa);
+      setTimeout(() => {
+        closeAllModals();
+      }, 8000);
     });
     toast('Siswa ditemukan: ' + student.nama);
   } else {
