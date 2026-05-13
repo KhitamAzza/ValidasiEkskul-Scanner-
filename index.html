@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>QR Scanner - Info Siswa</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link rel="stylesheet" href="style.css">
+
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Memuat data siswa...</div>
+  <div class="loading-subtext" id="loadingSubtext">Menghubungkan ke server</div>
+</div>
+<div class="app-title">VALIDASI EKSKUL SMKDIPO 2025-2026</div>
+<div class="app-subtitle">Scan QR Code untuk memeriksa status siswa</div>
+<div id="scanner-wrapper">
+  <div id="reader"></div>
+  <div class="scan-overlay">
+    <div class="scan-line"></div>
+  </div>
+</div>
+<div class="scan-label">Arahkan QR ke kotak</div>
+
+<div class="scanned-result" id="scannedResult">
+  <div class="result-id" id="scannedId"></div>
+  <div class="result-hint">Tap untuk melihat detail</div>
+</div>
+
+
+<button class="fab fab-search" id="btnSearch" title="Cari Siswa">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+</button>
+
+<button class="fab fab-refresh" id="btnRefresh" title="Muat Ulang Data">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+</button>
+
+<!-- Student Info Modal -->
+<div class="modal-overlay" id="modalInfo">
+  <div class="modal-content" id="modalInfoContent">
+    <div class="modal-header">
+      <img class="student-photo" id="infoPhoto" src="" alt="Foto Siswa" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+      <div class="student-name" id="infoName">-</div>
+      <div class="student-class" id="infoClass">-</div>
+      <span class="status-badge" id="infoStatus">-</span>
+    </div>
+    <div class="modal-body">
+      <div class="info-row"><span class="info-label">ID Siswa</span><span class="info-value" id="infoId">-</span></div>
+      <div class="info-row"><span class="info-label">Ekstra</span><span class="info-value" id="infoEkstra">-</span></div>
+      <div class="info-row"><span class="info-label">Denda</span><span class="info-value" id="infoDenda">-</span></div>
+      <div class="info-row"><span class="info-label">Denda Dibayar</span><span class="info-value" id="infoDendaBayar">-</span></div>
+      <div class="info-row"><span class="info-label">Sisa Denda</span><span class="info-value" id="infoSisa">-</span></div>
+      <div class="info-row"><span class="info-label">Syarat Khusus</span><span class="info-value" id="infoSyarat">-</span></div>
+      <button class="detail-btn" id="btnDetail">Lihat Detail Penilaian</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-content" id="modalDetailContent">
+    <div class="modal-header">
+      <img class="student-photo" id="detailPhoto" src="" alt="Foto Siswa" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+      <div class="student-name" id="detailName">-</div>
+      <div class="student-class" id="detailClass">-</div>
+      <span class="status-badge" id="detailStatus">-</span>
+    </div>
+    <div class="modal-body">
+      <ul class="assessment-list" id="assessmentList"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- Search Dialog -->
+<div class="search-dialog-overlay" id="searchDialog">
+  <div class="search-header">
+    <input type="text" class="search-input" id="searchInput" placeholder="Cari nama atau ID siswa..." autocomplete="off">
+    <button class="search-close" id="btnCloseSearch">&times;</button>
+  </div>
+  <div class="search-results" id="searchResults">
+    <div class="loading-state">Ketik untuk mencari siswa...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="script.js"></script>
+
+
+<!-- Stamp Animation Overlay -->
+<div class="stamp-overlay" id="stampOverlay">
+  <div class="stamp-photo-wrapper">
+    <img class="stamp-photo" id="stampPhoto" src="" alt="">
+    <div class="stamp-text" id="stampText"></div>
+  </div>
+  <div class="stamp-student-name" id="stampName"></div>
+</div>
+<div class="app-footer">Aplikasi dikembangkan oleh Chusnul Khitam Azza,S.Kom</div>
+</body>
+</html>
