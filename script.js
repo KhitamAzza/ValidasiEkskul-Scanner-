@@ -113,8 +113,11 @@ function onScanSuccess(decodedText) {
   const student = findStudent(studentId);
   if (student) {
     showStampAnimation(student, () => {
-      showStudentModal(student);
-    });
+  showDetailModal(student.idSiswa);
+  setTimeout(() => {
+    closeAllModals();
+  }, 8000);
+});
     toast('Siswa ditemukan: ' + student.nama);
   } else {
     toast('Siswa tidak ditemukan: ' + studentId);
