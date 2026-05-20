@@ -29,6 +29,26 @@ let modalStack = [];
 let selectedSearchIndex = -1;
 
 // ═══════════════════════════════════════
+// INTERRUPT / DEBOUNCE HELPERS
+// ═══════════════════════════════════════
+let stampTimer = null;
+let detailTimer = null;
+let lastScanId = null;
+let lastScanTime = 0;
+const SCAN_DEBOUNCE_MS = 1500;
+
+function clearAllDisplayTimers() {
+  if (stampTimer) { clearTimeout(stampTimer); stampTimer = null; }
+  if (detailTimer) { clearTimeout(detailTimer); detailTimer = null; }
+}
+
+function resetDisplayForNewScan() {
+  clearAllDisplayTimers();
+  document.getElementById('stampOverlay').classList.remove('active');
+  closeAllModals(); // clears modals + result bar via resumeScanner()
+}
+
+// ═══════════════════════════════════════
 // API
 // ═══════════════════════════════════════
 async function api(action, payload = {}) {
@@ -101,9 +121,16 @@ function initScanner() {
 }
 
 function onScanSuccess(decodedText) {
-  if (!isScanning) return;
-  isScanning = false;
   const studentId = decodedText.trim();
+
+  // Debounce: ignore if same ID scanned within 1.5 s
+  if (studentId === lastScanId && (Date.now() - lastScanTime) < SCAN_DEBOUNCE_MS) return;
+
+  lastScanId = studentId;
+  lastScanTime = Date.now();
+
+  // Interrupt any ongoing stamp / detail flow from previous scan
+  resetDisplayForNewScan();
 
   const resultBar = document.getElementById('scannedResult');
   const resultId = document.getElementById('scannedId');
@@ -114,14 +141,17 @@ function onScanSuccess(decodedText) {
   if (student) {
     showStampAnimation(student, () => {
       showDetailModal(student.idSiswa);
-      setTimeout(() => {
+      detailTimer = setTimeout(() => {
         closeAllModals();
       }, 8000);
     });
     toast('Siswa ditemukan: ' + student.nama);
   } else {
     toast('Siswa tidak ditemukan: ' + studentId);
-    setTimeout(resumeScanner, 2000);
+    detailTimer = setTimeout(() => {
+      resumeScanner();
+      lastScanId = null;
+    }, 2000);
   }
 }
 
@@ -233,7 +263,8 @@ function showStampAnimation(student, onComplete) {
   playSound(student.status);
   overlay.classList.add('active');
 
-  setTimeout(() => {
+  stampTimer = setTimeout(() => {
+    stampTimer = null;
     overlay.classList.remove('active');
     if (onComplete) onComplete();
   }, 3000);
@@ -578,9 +609,9 @@ function initBluetoothScanner() {
       activeElement.id !== 'scannerInput'
     );
     const searchOpen = document.getElementById('searchDialog').classList.contains('active');
-    const anyModalOpen = modalStack.length > 0;
+    // REMOVED: anyModalOpen check so BT scanner works during stamp / detail modal
 
-    if (isRealInputFocused || searchOpen || anyModalOpen) return;
+    if (isRealInputFocused || searchOpen) return;
 
     const now = Date.now();
     const timeDiff = now - lastKeyTime;
@@ -608,8 +639,14 @@ function initBluetoothScanner() {
 function handleBarcodeScan(barcode) {
   console.log('Barcode scanned:', barcode);
 
-  if (!isScanning) return;
-  isScanning = false;
+  // Debounce: ignore if same barcode within 1.5 s
+  if (barcode === lastScanId && (Date.now() - lastScanTime) < SCAN_DEBOUNCE_MS) return;
+
+  lastScanId = barcode;
+  lastScanTime = Date.now();
+
+  // Interrupt any ongoing stamp / detail flow
+  resetDisplayForNewScan();
 
   const resultBar = document.getElementById('scannedResult');
   const resultId = document.getElementById('scannedId');
@@ -620,14 +657,17 @@ function handleBarcodeScan(barcode) {
   if (student) {
     showStampAnimation(student, () => {
       showDetailModal(student.idSiswa);
-      setTimeout(() => {
+      detailTimer = setTimeout(() => {
         closeAllModals();
       }, 8000);
     });
     toast('Siswa ditemukan: ' + student.nama);
   } else {
     toast('Siswa tidak ditemukan: ' + barcode);
-    setTimeout(resumeScanner, 2000);
+    detailTimer = setTimeout(() => {
+      resumeScanner();
+      lastScanId = null;
+    }, 2000);
   }
 }
 
